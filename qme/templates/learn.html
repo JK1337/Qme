@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <h1>Learn to earn</h1>
+  <p>Complete modules to earn points and unlock Qme certificates — visible on your reQme.</p>
+</section>
+
+<div class="points-banner">
+  <span class="points-label">Your points</span>
+  <strong id="total-points">{{ total_points }}</strong>
+</div>
+
+<div class="card-grid">
+  {% for m in modules %}
+  <article class="card module-card" data-module-id="{{ m.id }}">
+    <h3>{{ m.title }}</h3>
+    <p class="meta">+{{ m.points }} points · {{ m.certificate }}</p>
+    {% if m.id in progress.completed_module_ids %}
+    <span class="badge badge-done">Completed</span>
+    {% else %}
+    <button type="button" class="btn btn-primary btn-sm complete-btn">Mark complete (demo)</button>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+<script>
+document.querySelectorAll('.complete-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var card = btn.closest('.module-card');
+    var id = card.getAttribute('data-module-id');
+    fetch('/learn/complete/' + id, { method: 'POST' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        document.getElementById('total-points').textContent = data.total_points;
+        card.innerHTML = '<h3>' + card.querySelector('h3').textContent + '</h3>' +
+          '<p class="meta">' + card.querySelector('.meta').textContent + '</p>' +
+          '<span class="badge badge-done">Completed</span>';
+      });
+  });
+});
+</script>
+{% endblock %}

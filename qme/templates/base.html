@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ title }} — Qme{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
+</head>
+<body>
+  <header class="top-nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">Qme</a>
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/learn">Learn to earn</a>
+        <a href="/cv">CV &amp; AI</a>
+        <a href="/reqme">reQme</a>
+      </nav>
+    </div>
+  </header>
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    <p>Qme — between recruiters and job seekers. Build your path to a dream role.</p>
+  </footer>
+</body>
+</html>

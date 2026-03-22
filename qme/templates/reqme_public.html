@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <h1>Shared reQme</h1>
+  <p class="hint">Token: <code>{{ token }}</code> — scaffold view; connect profile data later.</p>
+</section>
+<div class="card profile-preview">
+  <div class="profile-header">
+    <div class="avatar-placeholder"></div>
+    <div>
+      <strong>Candidate</strong>
+      <p class="hint">Training certificates &amp; CV preview would load here.</p>
+    </div>
+  </div>
+  <p>This public page is the recipient-facing view of a reQme share.</p>
+  <a class="btn btn-outline" href="/">About Qme</a>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <h1>CV &amp; AI alignment</h1>
+  <p>Paste your CV and a job description. Qme returns a tailored draft (demo until you connect an LLM).</p>
+</section>
+
+<div class="two-col">
+  <form id="cv-form" class="card form-card">
+    <label>Your CV</label>
+    <textarea name="cv_text" rows="12" placeholder="Paste CV text…" required></textarea>
+    <label>Job description</label>
+    <textarea name="job_description" rows="8" placeholder="Paste the role description…" required></textarea>
+    <button type="submit" class="btn btn-primary">Generate aligned draft</button>
+  </form>
+  <div class="card output-card">
+    <h3>Output</h3>
+    <pre id="cv-output" class="output-pre">Submit the form to see a tailored draft.</pre>
+    <p id="cv-notes" class="hint"></p>
+  </div>
+</div>
+
+<section class="card style-section">
+  <h2>Styling &amp; reQme</h2>
+  <p>Coming next: pick visual themes for export (PDF/HTML) and attach your styled CV to your <a href="/reqme">reQme</a> share link.</p>
+</section>
+
+<script>
+document.getElementById('cv-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var fd = new FormData(e.target);
+  fetch('/api/cv/rewrite-job', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('cv-output').textContent = data.tailored_cv;
+      document.getElementById('cv-notes').textContent = data.notes + (data.demo ? ' (demo mode)' : '');
+    });
+});
+</script>
+{% endblock %}
