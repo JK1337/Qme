@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <h1>Create your Qme account</h1>
+  <p>
+    Your <strong>main CV</strong> and <strong>life story</strong> live on your profile.
+    They power CV rewrites and future AI job search across the app — you can add or refine them anytime.
+  </p>
+</section>
+
+{% if error %}
+<p class="form-error" role="alert">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="/account/register" class="card form-card account-form">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required autocomplete="email">
+
+  <label for="display_name">Display name</label>
+  <input id="display_name" name="display_name" type="text" autocomplete="name" placeholder="How you want to appear">
+
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" required minlength="6" autocomplete="new-password">
+
+  <h2 class="form-section-title">Your story on Qme (optional now)</h2>
+  <p class="hint">You can skip these and add them later under Account. When present, every job-targeted rewrite uses them together.</p>
+
+  <label for="main_cv">Main CV</label>
+  <textarea id="main_cv" name="main_cv" rows="10" placeholder="Your primary CV text — used as the default document for AI rewrites…"></textarea>
+
+  <label for="life_story">Life story</label>
+  <textarea id="life_story" name="life_story" rows="6" placeholder="Motivation, turning points, strengths, context recruiters do not see on a CV alone…"></textarea>
+
+  <button type="submit" class="btn btn-primary">Create account</button>
+  <p class="hint">Already have an account? <a href="/account/login">Sign in</a></p>
+</form>
+{% endblock %}

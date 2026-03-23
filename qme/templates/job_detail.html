@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — {{ job.company }}{% endblock %}
+{% block content %}
+<article class="card job-detail">
+  <p class="breadcrumb"><a href="/jobs">← All roles</a></p>
+  <h1>{{ job.title }}</h1>
+  <p class="job-meta">{{ job.company }} · {{ job.location }} · <span class="pill pill-{{ job.work_type }}">{{ job.work_type }}</span></p>
+  <p class="job-meta">{{ job.employment_type }} · {{ job.salary_range }} · {{ job.seniority }} · {{ job.department }} · posted {{ job.posted_days_ago }}d ago</p>
+  <p class="job-tags">Skills: {{ job.skills|join(', ') }}</p>
+  <div class="job-body">
+    <p>{{ job.description }}</p>
+  </div>
+  <div class="job-detail-actions">
+    <a class="btn btn-primary" href="/cv?job={{ job.id }}">Tailor my CV to this role</a>
+    <form method="post" action="/jobs/shortlist/toggle/{{ job.id }}" class="inline-form">
+      <button type="submit" class="btn btn-outline">
+        {% if job.id in job_shortlist %}Remove from shortlist{% else %}Save to shortlist{% endif %}
+      </button>
+    </form>
+  </div>
+</article>
+{% endblock %}

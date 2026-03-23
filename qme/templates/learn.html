@@ -1,20 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="page-header">
-  <h1>Learn to earn</h1>
-  <p>Complete modules to earn points and unlock Qme certificates — visible on your reQme.</p>
+  <h1>Play to learn</h1>
+  <p>
+    Complete modules to earn <strong>credits</strong> and <strong>certificates</strong>.
+    Signed-in users spend credits on each <a href="/cv">CV &amp; AI</a> rewrite ({{ rewrite_cost }} credits per run).
+    Certificates appear on your <a href="/reqme">reQme</a>.
+  </p>
 </section>
 
-<div class="points-banner">
-  <span class="points-label">Your points</span>
-  <strong id="total-points">{{ total_points }}</strong>
+<div class="credits-banner credits-banner-split">
+  <div>
+    <span class="credits-label">Available to spend</span>
+    <strong id="credits-available">{{ credits_available }}</strong>
+  </div>
+  <div>
+    <span class="credits-label">Earned from modules</span>
+    <strong id="credits-earned">{{ credits_earned }}</strong>
+  </div>
 </div>
 
 <div class="card-grid">
   {% for m in modules %}
   <article class="card module-card" data-module-id="{{ m.id }}">
     <h3>{{ m.title }}</h3>
-    <p class="meta">+{{ m.points }} points · {{ m.certificate }}</p>
+    <p class="meta">+{{ m.credits }} credits · {{ m.certificate }}</p>
     {% if m.id in progress.completed_module_ids %}
     <span class="badge badge-done">Completed</span>
     {% else %}
@@ -28,10 +38,11 @@ document.querySelectorAll('.complete-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     var card = btn.closest('.module-card');
     var id = card.getAttribute('data-module-id');
-    fetch('/learn/complete/' + id, { method: 'POST' })
+    fetch('/learn/complete/' + id, { method: 'POST', credentials: 'same-origin' })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        document.getElementById('total-points').textContent = data.total_points;
+        document.getElementById('credits-available').textContent = data.credits_available;
+        document.getElementById('credits-earned').textContent = data.credits_earned;
         card.innerHTML = '<h3>' + card.querySelector('h3').textContent + '</h3>' +
           '<p class="meta">' + card.querySelector('.meta').textContent + '</p>' +
           '<span class="badge badge-done">Completed</span>';

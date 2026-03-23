@@ -1,18 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
+{% if not_found %}
 <section class="page-header">
-  <h1>Shared reQme</h1>
-  <p class="hint">Token: <code>{{ token }}</code> — scaffold view; connect profile data later.</p>
+  <h1>Link not found</h1>
+  <p>This reQme link is invalid or has been rotated.</p>
+  <a class="btn btn-outline" href="/">Home</a>
 </section>
-<div class="card profile-preview">
-  <div class="profile-header">
-    <div class="avatar-placeholder"></div>
-    <div>
-      <strong>Candidate</strong>
-      <p class="hint">Training certificates &amp; CV preview would load here.</p>
-    </div>
-  </div>
-  <p>This public page is the recipient-facing view of a reQme share.</p>
-  <a class="btn btn-outline" href="/">About Qme</a>
+{% else %}
+<section class="page-header">
+  <h1>{{ public_user.display_name }}</h1>
+  <p class="hint">Shared via Qme reQme</p>
+</section>
+<div class="card profile-preview reqme-public">
+  {% if certificates %}
+  <h2>Certificates</h2>
+  <ul class="cert-chips">
+    {% for c in certificates %}
+    <li class="cert-chip">{{ c }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if story_excerpt %}
+  <h2>Story</h2>
+  <p class="story-block">{{ story_excerpt }}</p>
+  {% endif %}
+  {% if cv_excerpt %}
+  <h2>CV excerpt</h2>
+  <pre class="cv-excerpt-block">{{ cv_excerpt }}</pre>
+  {% endif %}
+  <p class="hint"><a href="/">Learn about Qme</a></p>
 </div>
+{% endif %}
 {% endblock %}

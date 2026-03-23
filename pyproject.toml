@@ -1,7 +1,7 @@
 [project]
 name = "qme"
 version = "0.1.0"
-description = "Qme — a jobs platform bridging recruiters and job seekers with learn-to-earn, AI CV tools, and shareable reQmes."
+description = "Qme — find your dream job; spend play-to-learn credits on AI CV tools and shareable reQmes."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -12,6 +12,7 @@ dependencies = [
     "jinja2>=3.1.3",
     "python-multipart>=0.0.9",
     "pydantic-settings>=2.1.0",
+    "itsdangerous>=2.1.0",
 ]
 
 [project.optional-dependencies]

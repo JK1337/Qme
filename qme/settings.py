@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     app_name: str = "Qme"
     env: str = "development"
+    # Session cookies (change in production)
+    secret_key: str = "change-me-qme-dev-secret"
     # Optional LLM hook for future CV rewriting
     llm_provider: str | None = None
 

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Find your dream job — why Qme exists{% endblock %}
+{% block content %}
+<section class="page-header dream-job-lead">
+  <h1>Find your dream job</h1>
+  <p class="lead">
+    That is the main reason to use Qme. Everything else — your profile, training, certificates, and AI tools —
+    exists so you can <strong>discover the role you really want</strong> and <strong>get there</strong>.
+  </p>
+</section>
+
+<div class="card dream-job-card">
+  <h2>After you find it, use your credits</h2>
+  <p>
+    When you have a dream job in sight (a specific posting, company, or path), you do not start from zero.
+    You bank <strong>credits</strong> by completing <strong>play-to-learn</strong> modules and earning
+    <strong>certificates</strong>. Those credits are what you spend on the premium moves that close the gap:
+    tailoring your CV to that exact description, polishing your story, and sharing a sharp <strong>reQme</strong>.
+  </p>
+  <p class="hint">
+    In this demo, credits accrue in <a href="/learn">Play to learn</a>; a full product would deduct credits when you run paid AI actions or exports.
+  </p>
+</div>
+
+<div class="cta-row" style="margin-top: 1.5rem;">
+  <a class="btn btn-primary" href="/jobs">Browse roles</a>
+  <a class="btn btn-outline" href="/learn">Earn credits</a>
+  <a class="btn btn-outline" href="/cv">Use tools for a role</a>
+  <a class="btn btn-outline" href="/account/register">Create account</a>
+</div>
+{% endblock %}

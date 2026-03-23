@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header dream-job-lead">
+  <h1>Find your dream job</h1>
+  <p class="lead">
+    That is the main reason to use Qme. Everything else — your profile, training, certificates, and AI tools —
+    exists so you can <strong>discover the role you really want</strong> and <strong>get there</strong>.
+  </p>
+</section>
+
+<div class="card dream-job-card">
+  <h2>After you find it, use your credits</h2>
+  <p>
+    When you have a dream job in sight, you do not start from zero. You bank <strong>credits</strong> by completing
+    <strong>play-to-learn</strong> modules and earning <strong>certificates</strong>. Those credits are what you spend
+    on premium moves: tailoring your CV to that exact role, polishing your story, and sharing a stronger <strong>reQme</strong>.
+  </p>
+  <p class="hint">Browse roles below, shortlist your favorites, then jump straight to CV tailoring for a selected posting.</p>
+</div>
+
+<section class="page-header" style="margin-top:1.25rem;">
+  <h1>Browse roles</h1>
+  <p>Save roles to your shortlist, open details, then <strong>Tailor CV</strong> to pre-fill the job description.</p>
+</section>
+
+<form method="get" action="/jobs" class="card filters-card">
+  <div class="filters-row">
+    <div>
+      <label for="q">Keywords</label>
+      <input id="q" name="q" type="search" value="{{ q }}" placeholder="Title, company, skills, department…">
+    </div>
+    <div>
+      <label for="location">Location</label>
+      <input id="location" name="location" type="text" value="{{ location }}" placeholder="City or remote">
+    </div>
+    <div>
+      <label for="work_type">Work type</label>
+      <select id="work_type" name="work_type">
+        <option value="" {% if not work_type %}selected{% endif %}>Any</option>
+        <option value="remote" {% if work_type == 'remote' %}selected{% endif %}>Remote</option>
+        <option value="hybrid" {% if work_type == 'hybrid' %}selected{% endif %}>Hybrid</option>
+        <option value="onsite" {% if work_type == 'onsite' %}selected{% endif %}>On-site</option>
+      </select>
+    </div>
+    <div class="filters-actions">
+      <button type="submit" class="btn btn-primary">Search</button>
+      <a href="/jobs" class="btn btn-outline">Reset</a>
+    </div>
+  </div>
+</form>
+
+{% if job_shortlist %}
+<p class="hint shortlist-hint">Shortlist: <strong>{{ job_shortlist|length }}</strong> role(s) — <a href="/cv">Tailor your CV</a> when you are ready.</p>
+{% endif %}
+
+<div class="job-list">
+  {% for j in jobs %}
+  <article class="card job-card">
+    <div class="job-card-main">
+      <h2><a href="/jobs/{{ j.id }}">{{ j.title }}</a></h2>
+      <p class="job-meta">{{ j.company }} · {{ j.location }} · <span class="pill pill-{{ j.work_type }}">{{ j.work_type }}</span> · {{ j.seniority }} · {{ j.department }}</p>
+      <p class="job-meta">{{ j.employment_type }} · {{ j.salary_range }} · posted {{ j.posted_days_ago }}d ago</p>
+      <p class="job-snippet">{{ j.snippet }}</p>
+      <p class="job-tags">Skills: {{ j.skills|join(', ') }}</p>
+      <div class="job-card-actions">
+        <a class="btn btn-primary btn-sm" href="/cv?job={{ j.id }}">Tailor CV</a>
+        <a class="btn btn-outline btn-sm" href="/jobs/{{ j.id }}">View role</a>
+        <form method="post" action="/jobs/shortlist/toggle/{{ j.id }}" class="inline-form">
+          <button type="submit" class="btn btn-outline btn-sm">
+            {% if j.id in job_shortlist %}Remove from shortlist{% else %}Save to shortlist{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <p class="hint">No roles match — try clearing filters or different keywords.</p>
+  {% endfor %}
+</div>
+{% endblock %}

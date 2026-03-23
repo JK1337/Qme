@@ -1,11 +1,15 @@
 # Qme
 
-Qme is a jobs platform with a professional-network feel: it sits between recruiters and job seekers and gives candidates concrete tools to reach a dream role — not just listings.
+Qme is built around one goal: **find your dream job**. Play-to-learn modules earn **credits** and certificates; once a target role is in sight, those credits feed premium tools (CV alignment, polish, reQme) — the demo accrues credits only; spending them on actions can be wired next.
 
 ## What it offers
 
-- **Learn to earn** — complete training modules to earn points and Qme certificates (demo store in this scaffold; swap for a database when you scale).
-- **CV aligned to the role** — paste a CV and a job description; get a tailored draft. The API is ready to plug in an LLM via `QME_LLM_PROVIDER` and your keys (see `qme/services/cv_rewrite.py`).
+- **Dream job first** — narrative and `/dream-job` page state the product intent.
+- **Browse roles** — `/jobs` with filters, shortlist (session), detail pages, and “Tailor CV” deep-links to `/cv?job=…` with the description pre-filled.
+- **Play to learn** — complete modules to earn **credits** and certificates. **Signed-in** CV rewrites cost `REWRITE_COST` credits (see `qme/services/credits.py`); guests can try rewrites without spending.
+- **reQme** — stable `/r/{token}` per account; rotate invalidates old links. Public page shows certificates and CV/life-story excerpts.
+- **Account + CV rewrite** — create an account with an optional **main CV** and **life story**. While signed in, job-targeted rewrites use your main CV by default (you can paste a one-off override) and always incorporate your life story as narrative strength. The same context is intended to power future AI job search across the app. Wire a real LLM via `QME_LLM_PROVIDER` and your keys (see `qme/services/cv_rewrite.py`).
+- **Sessions** — set `QME_SECRET_KEY` in production for signed cookies (`itsdangerous`).
 - **Styling & reQme** — the UI sketches multiple CV styles and a **reQme** share link (`/r/{token}`) for a recipient-facing profile view.
 
 ## Requirements

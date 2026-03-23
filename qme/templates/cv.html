@@ -2,39 +2,123 @@
 {% block content %}
 <section class="page-header">
   <h1>CV &amp; AI alignment</h1>
-  <p>Paste your CV and a job description. Qme returns a tailored draft (demo until you connect an LLM).</p>
+  <p>
+    Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
+    When signed in, Qme uses your <strong>main CV</strong> and <strong>life story</strong> for context.
+    {% if profile_user %}
+    Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
+    {% else %}
+    <a href="/account/register">Create an account</a> to link your story; guests can try rewrites without spending credits.
+    {% endif %}
+  </p>
 </section>
 
-<div class="two-col">
-  <form id="cv-form" class="card form-card">
-    <label>Your CV</label>
-    <textarea name="cv_text" rows="12" placeholder="Paste CV text…" required></textarea>
-    <label>Job description</label>
-    <textarea name="job_description" rows="8" placeholder="Paste the role description…" required></textarea>
-    <button type="submit" class="btn btn-primary">Generate aligned draft</button>
-  </form>
+{% if job_pick %}
+<div class="card banner-job-pick">
+  <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
+  <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
+</div>
+{% endif %}
+
+<div class="two-col cv-layout">
+  <div class="cv-col-left">
+    <form id="cv-form" class="card form-card">
+      <label>CV for this rewrite</label>
+      <p class="hint">
+        {% if profile_user and profile_user.main_cv %}
+        Left empty, your <a href="/account">main CV</a> is used.
+        {% elif profile_user %}
+        Add a <a href="/account">main CV</a>, or paste below.
+        {% else %}
+        Paste your CV, or sign in to use a saved main CV.
+        {% endif %}
+      </p>
+      <textarea name="cv_override" rows="10" placeholder="Optional override…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
+      <label>Job description</label>
+      <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
+      <button type="submit" class="btn btn-primary">Generate aligned draft</button>
+    </form>
+
+    <section class="card style-section">
+      <h2>Preview style</h2>
+      <p class="hint">Applies to the output panel (export / print coming next).</p>
+      <div class="style-picker" role="radiogroup" aria-label="CV style">
+        <label class="style-option"><input type="radio" name="cv_style" value="classic" checked> Classic</label>
+        <label class="style-option"><input type="radio" name="cv_style" value="modern"> Modern</label>
+        <label class="style-option"><input type="radio" name="cv_style" value="executive"> Executive</label>
+      </div>
+    </section>
+  </div>
+
   <div class="card output-card">
-    <h3>Output</h3>
-    <pre id="cv-output" class="output-pre">Submit the form to see a tailored draft.</pre>
+    <div class="output-toolbar">
+      <h3>Output</h3>
+      <button type="button" class="btn btn-outline btn-sm" id="download-txt">Download .txt</button>
+    </div>
+    <div id="cv-output-wrap" class="cv-styled-output cv-style-classic">
+      <pre id="cv-output" class="output-pre-inner">Submit the form to see a tailored draft.</pre>
+    </div>
     <p id="cv-notes" class="hint"></p>
+    <p id="cv-error" class="form-error" hidden></p>
   </div>
 </div>
-
-<section class="card style-section">
-  <h2>Styling &amp; reQme</h2>
-  <p>Coming next: pick visual themes for export (PDF/HTML) and attach your styled CV to your <a href="/reqme">reQme</a> share link.</p>
-</section>
-
 <script>
-document.getElementById('cv-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  var fd = new FormData(e.target);
-  fetch('/api/cv/rewrite-job', { method: 'POST', body: fd })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      document.getElementById('cv-output').textContent = data.tailored_cv;
-      document.getElementById('cv-notes').textContent = data.notes + (data.demo ? ' (demo mode)' : '');
-    });
-});
+(function() {
+  var form = document.getElementById('cv-form');
+  var out = document.getElementById('cv-output');
+  var wrap = document.getElementById('cv-output-wrap');
+  var errEl = document.getElementById('cv-error');
+  var notesEl = document.getElementById('cv-notes');
+
+  function applyStyle() {
+    var v = document.querySelector('input[name="cv_style"]:checked');
+    var val = v ? v.value : 'classic';
+    wrap.className = 'cv-styled-output cv-style-' + val;
+  }
+  document.querySelectorAll('input[name="cv_style"]').forEach(function(r) {
+    r.addEventListener('change', applyStyle);
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    errEl.hidden = true;
+    errEl.textContent = '';
+    notesEl.textContent = '';
+    var fd = new FormData(form);
+    fetch('/api/cv/rewrite-job', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function(r) {
+        return r.json().then(function(data) {
+          if (r.status === 402 || !r.ok) throw new Error(data.error || 'Request failed');
+          return data;
+        });
+      })
+      .then(function(data) {
+        out.textContent = data.tailored_cv;
+        var line = data.notes + (data.demo ? ' (demo mode)' : '');
+        if (typeof data.credits_remaining === 'number') {
+          line += ' · Credits left: ' + data.credits_remaining;
+          var nb = document.querySelector('.nav-credits strong');
+          if (nb) nb.textContent = data.credits_remaining;
+          var dup = document.getElementById('nav-balance-dup');
+          if (dup) dup.textContent = data.credits_remaining;
+        }
+        notesEl.textContent = line;
+      })
+      .catch(function(err) {
+        errEl.textContent = err.message;
+        errEl.hidden = false;
+      });
+  });
+
+  document.getElementById('download-txt').addEventListener('click', function() {
+    var t = out.textContent || '';
+    var blob = new Blob([t], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'qme-cv-draft.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+})();
 </script>
 {% endblock %}

@@ -2,28 +2,45 @@
 {% block content %}
 <section class="page-header">
   <h1>Your reQme</h1>
-  <p>Share a single link that combines your profile story, training credentials, and chosen CV presentation.</p>
+  <p>Stable share link for people you trust. Rotating the link invalidates the old URL.</p>
 </section>
 
 <div class="card share-card">
-  <h2>Demo share link</h2>
-  <p class="hint">Share this link with recruiters or mentors you choose.</p>
+  <h2>Share link</h2>
   <div class="share-url">
-    <input readonly value="{{ share_url }}" id="share-input">
+    <input readonly value="{{ share_url }}" id="share-input" aria-label="Share URL">
     <button type="button" class="btn btn-outline btn-sm" id="copy-btn">Copy</button>
   </div>
+  <form method="post" action="/reqme/rotate-token" class="rotate-form" onsubmit="return confirm('Rotate link? Old links will stop working.');">
+    <button type="submit" class="btn btn-outline btn-sm">Rotate link</button>
+  </form>
 </div>
 
-<div class="card profile-preview">
-  <h2>Preview (scaffold)</h2>
+<div class="card profile-preview reqme-preview">
+  <h2>Live preview</h2>
   <div class="profile-header">
-    <div class="avatar-placeholder"></div>
+    <div class="avatar-placeholder" aria-hidden="true"></div>
     <div>
-      <strong>Your name</strong>
-      <p class="hint">Headline · Open to roles</p>
+      <strong>{{ current_user.display_name }}</strong>
+      <p class="hint">{{ current_user.email }}</p>
     </div>
   </div>
-  <p>Certificates from <a href="/learn">Learn to earn</a> and your latest CV style appear here for visitors you trust.</p>
+  {% if certificates %}
+  <h3 class="preview-section-title">Certificates</h3>
+  <ul class="cert-chips">
+    {% for c in certificates %}
+    <li class="cert-chip">{{ c }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint">Complete <a href="/learn">Play to learn</a> modules to show certificates here.</p>
+  {% endif %}
+  {% if cv_excerpt %}
+  <h3 class="preview-section-title">CV excerpt</h3>
+  <pre class="cv-excerpt-block">{{ cv_excerpt }}</pre>
+  {% else %}
+  <p class="hint">Add a <a href="/account">main CV</a> to show an excerpt to visitors.</p>
+  {% endif %}
 </div>
 
 <script>
