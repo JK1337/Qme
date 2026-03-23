@@ -5,6 +5,11 @@
   <p>Access your main CV, life story, and tailored rewrites.</p>
 </section>
 
+<div class="card auth-alt-card">
+  <p class="auth-alt-lead"><strong>New to Qme?</strong> Create a free account to save your CV and use credits.</p>
+  <a class="btn btn-outline" href="{{ register_href }}">Create account</a>
+</div>
+
 {% if error %}
 <p class="form-error" role="alert">{{ error }}</p>
 {% endif %}
@@ -19,6 +24,6 @@
   <input id="password" name="password" type="password" required autocomplete="current-password">
 
   <button type="submit" class="btn btn-primary">Sign in</button>
-  <p class="hint">New here? <a href="/account/register">Create an account</a></p>
+  <p class="hint">Or <a href="{{ register_href }}">create an account</a> if you do not have one yet.</p>
 </form>
 {% endblock %}

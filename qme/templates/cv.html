@@ -1,67 +1,126 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="page-header">
-  <h1>CV &amp; AI alignment</h1>
+  <h1>My Resume</h1>
   <p>
-    Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
-    When signed in, Qme uses your <strong>main CV</strong> and <strong>life story</strong> for context.
-    {% if profile_user %}
-    Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
-    {% else %}
-    <a href="/account/register">Create an account</a> to link your story; guests can try rewrites without spending credits.
-    {% endif %}
+    Your resume workspace: certificates from training, AI alignment to job postings, and ways to share or save your draft.
   </p>
 </section>
 
-{% if job_pick %}
-<div class="card banner-job-pick">
-  <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
-  <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
-</div>
-{% endif %}
+<nav class="resume-toc card" aria-label="My Resume sections">
+  <span class="resume-toc-label">Jump to:</span>
+  <a href="#my-certificates">My uploaded certificates</a>
+  <span class="resume-toc-sep" aria-hidden="true">·</span>
+  <a href="#rewrite-with-ai">Rewrite with AI</a>
+  <span class="resume-toc-sep" aria-hidden="true">·</span>
+  <a href="#share-download">Share and download</a>
+</nav>
 
-<div class="two-col cv-layout">
-  <div class="cv-col-left">
-    <form id="cv-form" class="card form-card">
-      <label>CV for this rewrite</label>
-      <p class="hint">
-        {% if profile_user and profile_user.main_cv %}
-        Left empty, your <a href="/account">main CV</a> is used.
-        {% elif profile_user %}
-        Add a <a href="/account">main CV</a>, or paste below.
-        {% else %}
-        Paste your CV, or sign in to use a saved main CV.
-        {% endif %}
-      </p>
-      <textarea name="cv_override" rows="10" placeholder="Optional override…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
-      <label>Job description</label>
-      <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
-      <button type="submit" class="btn btn-primary">Generate aligned draft</button>
-    </form>
+<section id="my-certificates" class="card resume-section">
+  <h2 class="resume-section-title">My uploaded certificates</h2>
+  <p class="hint">
+    Certificates you earn from <a href="/learn">Play to learn</a> modules appear here and on your public reQme when you share your link.
+  </p>
+  {% if certificates %}
+  <ul class="cert-chips" role="list">
+    {% for c in certificates %}
+    <li class="cert-chip">{{ c }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint empty-hint">No certificates yet — complete a module under <a href="/learn">Play to learn</a> to earn your first one.</p>
+  {% endif %}
+</section>
 
-    <section class="card style-section">
-      <h2>Preview style</h2>
-      <p class="hint">Applies to the output panel (export / print coming next).</p>
-      <div class="style-picker" role="radiogroup" aria-label="CV style">
-        <label class="style-option"><input type="radio" name="cv_style" value="classic" checked> Classic</label>
-        <label class="style-option"><input type="radio" name="cv_style" value="modern"> Modern</label>
-        <label class="style-option"><input type="radio" name="cv_style" value="executive"> Executive</label>
+<section id="rewrite-with-ai" class="resume-section resume-section-rewrite">
+  <div class="page-header resume-subhead">
+    <h2 class="resume-section-title">Rewrite my CV towards a job description with AI</h2>
+    <p>
+      Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
+      When signed in, Qme uses your <strong>main CV</strong> and <strong>life story</strong> for context.
+      {% if profile_user %}
+      Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
+      {% else %}
+      <a href="{{ register_href }}">Create an account</a> to link your story; guests can try rewrites without spending credits.
+      {% endif %}
+    </p>
+  </div>
+
+  {% if job_pick %}
+  <div class="card banner-job-pick">
+    <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
+    <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
+  </div>
+  {% endif %}
+
+  <div class="two-col cv-layout">
+    <div class="cv-col-left">
+      <form id="cv-form" class="card form-card">
+        <label>CV for this rewrite</label>
+        <p class="hint">
+          {% if profile_user and profile_user.main_cv %}
+          Left empty, your <a href="/account">main CV</a> is used.
+          {% elif profile_user %}
+          Add a <a href="/account">main CV</a>, or paste below.
+          {% else %}
+          Paste your CV, or sign in to use a saved main CV.
+          {% endif %}
+        </p>
+        <textarea name="cv_override" rows="10" placeholder="Optional override…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
+        <label>Job description</label>
+        <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
+        <button type="submit" class="btn btn-primary">Generate aligned draft</button>
+      </form>
+
+      <section class="card style-section">
+        <h3 class="style-section-title">Preview style</h3>
+        <p class="hint">Applies to the output panel below.</p>
+        <div class="style-picker" role="radiogroup" aria-label="CV style">
+          <label class="style-option"><input type="radio" name="cv_style" value="classic" checked> Classic</label>
+          <label class="style-option"><input type="radio" name="cv_style" value="modern"> Modern</label>
+          <label class="style-option"><input type="radio" name="cv_style" value="executive"> Executive</label>
+        </div>
+      </section>
+    </div>
+
+    <div class="card output-card">
+      <div class="output-toolbar">
+        <h3>Output preview</h3>
       </div>
-    </section>
+      <div id="cv-output-wrap" class="cv-styled-output cv-style-classic">
+        <pre id="cv-output" class="output-pre-inner">Submit the form to see a tailored draft.</pre>
+      </div>
+      <p id="cv-notes" class="hint"></p>
+      <p id="cv-error" class="form-error" hidden></p>
+    </div>
   </div>
+</section>
 
-  <div class="card output-card">
-    <div class="output-toolbar">
-      <h3>Output</h3>
-      <button type="button" class="btn btn-outline btn-sm" id="download-txt">Download .txt</button>
+<section id="share-download" class="card resume-section share-download-section">
+  <h2 class="resume-section-title">Share and download</h2>
+  <div class="share-download-grid">
+    <div class="share-download-col">
+      <h3 class="share-download-subtitle">Share</h3>
+      {% if profile_user and share_url %}
+      <p class="hint">Copy your reQme link so recruiters or mentors can view your profile, certificates, and CV excerpt.</p>
+      <div class="share-url">
+        <input readonly value="{{ share_url }}" id="cv-share-input" aria-label="Your reQme share URL">
+        <button type="button" class="btn btn-outline btn-sm" id="cv-share-copy">Copy</button>
+      </div>
+      <p class="hint"><a href="/reqme">Open reQme settings and live preview</a></p>
+      {% else %}
+      <p class="hint">Sign in to get a stable share link (reQme) for your profile and certificates.</p>
+      <a class="btn btn-outline btn-sm" href="/account/login?next=/cv">Sign in</a>
+      {% endif %}
     </div>
-    <div id="cv-output-wrap" class="cv-styled-output cv-style-classic">
-      <pre id="cv-output" class="output-pre-inner">Submit the form to see a tailored draft.</pre>
+    <div class="share-download-col">
+      <h3 class="share-download-subtitle">Download</h3>
+      <p class="hint">Save the AI-generated draft from <strong>Output preview</strong> as a plain text file.</p>
+      <button type="button" class="btn btn-primary btn-sm" id="download-txt">Download .txt</button>
     </div>
-    <p id="cv-notes" class="hint"></p>
-    <p id="cv-error" class="form-error" hidden></p>
   </div>
-</div>
+</section>
+
 <script>
 (function() {
   var form = document.getElementById('cv-form');
@@ -97,8 +156,6 @@
         var line = data.notes + (data.demo ? ' (demo mode)' : '');
         if (typeof data.credits_remaining === 'number') {
           line += ' · Credits left: ' + data.credits_remaining;
-          var nb = document.querySelector('.nav-credits strong');
-          if (nb) nb.textContent = data.credits_remaining;
           var dup = document.getElementById('nav-balance-dup');
           if (dup) dup.textContent = data.credits_remaining;
         }
@@ -119,6 +176,15 @@
     a.click();
     URL.revokeObjectURL(a.href);
   });
+
+  var copyBtn = document.getElementById('cv-share-copy');
+  var shareInput = document.getElementById('cv-share-input');
+  if (copyBtn && shareInput) {
+    copyBtn.addEventListener('click', function() {
+      shareInput.select();
+      document.execCommand('copy');
+    });
+  }
 })();
 </script>
 {% endblock %}

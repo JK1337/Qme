@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -16,6 +17,10 @@ from qme.settings import settings
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+
+def _safe_redirect_path(path: str, default: str = "/account") -> str:
+    return path if path.startswith("/") and not path.startswith("//") else default
 
 app = FastAPI(
     title=settings.app_name,
@@ -129,17 +134,27 @@ def complete_module(request: Request, module_id: str) -> JSONResponse:
 @app.get("/cv", response_class=HTMLResponse)
 def cv_tools(request: Request, job: str | None = None) -> HTMLResponse:
     user = accounts.user_from_request(request)
+    uid = accounts.session_user_id(request)
+    catalog = credits_service.get_catalog()
+    progress = credits_service.get_progress(request.session, uid)
+    certificates = credits_service.certificates_for_progress(progress, catalog)
     job_obj = jobs_service.get_job(job) if job else None
     jd_prefill = ""
     if job_obj:
         jd_prefill = f"{job_obj.title} — {job_obj.company} ({job_obj.location})\n\n{job_obj.description}"
+    base = str(request.base_url).rstrip("/")
+    share_url = f"{base}/r/{user.reqme_token}" if user else None
+    register_href = f"/account/register?{urlencode({'next': '/cv'})}"
     return tpl(
         request,
         "cv.html",
-        title="CV & AI",
+        title="My Resume",
         profile_user=user,
         job_pick=job_obj,
         job_description_prefill=jd_prefill,
+        certificates=certificates,
+        share_url=share_url,
+        register_href=register_href,
     )
 
 
@@ -198,8 +213,17 @@ def api_cv_rewrite_job(
 
 
 @app.get("/account/register", response_class=HTMLResponse)
-def register_form(request: Request, error: str | None = None) -> HTMLResponse:
-    return tpl(request, "register.html", title="Create account", error=error)
+def register_form(request: Request, error: str | None = None, next: str | None = None) -> HTMLResponse:
+    next_path = next or "/account"
+    login_href = f"/account/login?{urlencode({'next': next_path})}"
+    return tpl(
+        request,
+        "register.html",
+        title="Create account",
+        error=error,
+        next_path=next_path,
+        login_href=login_href,
+    )
 
 
 @app.post("/account/register", response_model=None)
@@ -210,6 +234,7 @@ def register_submit(
     password: str = Form(...),
     main_cv: str = Form(""),
     life_story: str = Form(""),
+    next: str = Form("/account"),
 ) -> RedirectResponse | HTMLResponse:
     err, user = accounts.register_user(
         email=email,
@@ -219,16 +244,34 @@ def register_submit(
         life_story=life_story,
     )
     if err:
-        return tpl(request, "register.html", title="Create account", error=err)
+        next_path = _safe_redirect_path(next)
+        login_href = f"/account/login?{urlencode({'next': next_path})}"
+        return tpl(
+            request,
+            "register.html",
+            title="Create account",
+            error=err,
+            next_path=next_path,
+            login_href=login_href,
+        )
     assert user is not None
     credits_service.migrate_guest_to_user(request.session, user.id)
     accounts.set_session_user(request, user.id)
-    return RedirectResponse(url="/account", status_code=303)
+    return RedirectResponse(url=_safe_redirect_path(next), status_code=303)
 
 
 @app.get("/account/login", response_class=HTMLResponse)
 def login_form(request: Request, error: str | None = None, next: str | None = None) -> HTMLResponse:
-    return tpl(request, "login.html", title="Sign in", error=error, next_path=next or "/account")
+    next_path = next or "/account"
+    register_href = f"/account/register?{urlencode({'next': next_path})}"
+    return tpl(
+        request,
+        "login.html",
+        title="Sign in",
+        error=error,
+        next_path=next_path,
+        register_href=register_href,
+    )
 
 
 @app.post("/account/login", response_model=None)
@@ -240,16 +283,18 @@ def login_submit(
 ) -> RedirectResponse | HTMLResponse:
     user = accounts.verify_login(email, password)
     if not user:
+        next_path = _safe_redirect_path(next)
+        register_href = f"/account/register?{urlencode({'next': next_path})}"
         return tpl(
             request,
             "login.html",
             title="Sign in",
             error="Email or password is incorrect.",
-            next_path=next,
+            next_path=next_path,
+            register_href=register_href,
         )
     accounts.set_session_user(request, user.id)
-    safe_next = next if next.startswith("/") and not next.startswith("//") else "/account"
-    return RedirectResponse(url=safe_next, status_code=303)
+    return RedirectResponse(url=_safe_redirect_path(next), status_code=303)
 
 
 @app.post("/account/logout", response_model=None)
@@ -319,7 +364,7 @@ def reqme(request: Request) -> RedirectResponse | HTMLResponse:
     return tpl(
         request,
         "reqme.html",
-        title="Your reQme",
+        title="My Resume · reQme",
         share_url=share_url,
         certificates=certs,
         cv_excerpt=excerpt,

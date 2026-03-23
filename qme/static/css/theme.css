@@ -71,11 +71,6 @@ body {
   color: var(--qme-text);
 }
 
-.nav-logout {
-  display: inline;
-  margin: 0;
-}
-
 .link-button {
   background: none;
   border: none;
@@ -205,6 +200,42 @@ body {
   max-width: 42rem;
 }
 
+.account-header .account-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-header .account-header-row > div p {
+  margin-bottom: 0;
+}
+
+.account-logout-form {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.auth-alt-card {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.auth-alt-lead {
+  margin: 0;
+  flex: 1 1 16rem;
+  color: var(--qme-text);
+}
+
+.auth-alt-lead strong {
+  color: var(--qme-blue-dark);
+}
+
 .credits-banner {
   background: var(--qme-card);
   border: 1px solid var(--qme-border);
@@ -230,16 +261,6 @@ body {
   font-size: 1.35rem;
   color: var(--qme-blue);
   display: block;
-}
-
-.nav-credits {
-  font-size: 0.85rem;
-  color: var(--qme-muted);
-  white-space: nowrap;
-}
-
-.nav-credits strong {
-  color: var(--qme-blue);
 }
 
 .dream-job-lead .lead {
@@ -549,6 +570,94 @@ code {
   margin-bottom: 1.25rem;
   background: #e3f2fd;
   border-color: #90caf9;
+}
+
+.resume-toc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.resume-toc-label {
+  color: var(--qme-muted);
+  margin-right: 0.25rem;
+}
+
+.resume-toc a {
+  color: var(--qme-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.resume-toc a:hover {
+  text-decoration: underline;
+}
+
+.resume-toc-sep {
+  color: var(--qme-border);
+  user-select: none;
+}
+
+.resume-section {
+  margin-bottom: 1.5rem;
+}
+
+.resume-section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--qme-blue-dark);
+}
+
+.resume-section .empty-hint {
+  margin-bottom: 0;
+}
+
+.resume-section-rewrite {
+  margin-bottom: 1.5rem;
+}
+
+.resume-subhead {
+  margin-bottom: 1rem;
+}
+
+.resume-subhead h2,
+.resume-subhead .resume-section-title {
+  margin-bottom: 0.35rem;
+}
+
+.resume-subhead p {
+  margin-bottom: 0.75rem;
+}
+
+.style-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.share-download-section .share-download-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 720px) {
+  .share-download-section .share-download-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.share-download-subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--qme-text);
+}
+
+.share-download-col .share-url {
+  margin-top: 0.5rem;
 }
 
 .cv-layout.two-col {

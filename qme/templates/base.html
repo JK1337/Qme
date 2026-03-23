@@ -14,17 +14,11 @@
         <a href="/">Home</a>
         <a href="/jobs">Browse roles</a>
         <a href="/learn">Play to learn</a>
-        <a href="/cv">CV &amp; AI</a>
-        <a href="/reqme">reQme</a>
-        <span class="nav-credits" title="Spendable credits">Credits: <strong>{{ credit_balance }}</strong></span>
+        <a href="/cv">My Resume</a>
         {% if current_user %}
         <a href="/account" class="nav-account">{{ current_user.display_name }}</a>
-        <form class="nav-logout" method="post" action="/account/logout">
-          <button type="submit" class="link-button">Log out</button>
-        </form>
         {% else %}
         <a href="/account/login">Sign in</a>
-        <a href="/account/register">Create account</a>
         {% endif %}
       </nav>
     </div>

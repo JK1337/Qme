@@ -11,7 +11,7 @@
     <p>{{ job.description }}</p>
   </div>
   <div class="job-detail-actions">
-    <a class="btn btn-primary" href="/cv?job={{ job.id }}">Tailor my CV to this role</a>
+    <a class="btn btn-primary" href="/cv?job={{ job.id }}">Tailor in My Resume</a>
     <form method="post" action="/jobs/shortlist/toggle/{{ job.id }}" class="inline-form">
       <button type="submit" class="btn btn-outline">
         {% if job.id in job_shortlist %}Remove from shortlist{% else %}Save to shortlist{% endif %}

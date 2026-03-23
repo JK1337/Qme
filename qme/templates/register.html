@@ -13,6 +13,8 @@
 {% endif %}
 
 <form method="post" action="/account/register" class="card form-card account-form">
+  <input type="hidden" name="next" value="{{ next_path or '/account' }}">
+
   <label for="email">Email</label>
   <input id="email" name="email" type="email" required autocomplete="email">
 
@@ -32,6 +34,6 @@
   <textarea id="life_story" name="life_story" rows="6" placeholder="Motivation, turning points, strengths, context recruiters do not see on a CV alone…"></textarea>
 
   <button type="submit" class="btn btn-primary">Create account</button>
-  <p class="hint">Already have an account? <a href="/account/login">Sign in</a></p>
+  <p class="hint">Already have an account? <a href="{{ login_href }}">Sign in</a></p>
 </form>
 {% endblock %}
