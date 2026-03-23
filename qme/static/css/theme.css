@@ -102,6 +102,17 @@ body {
   color: var(--qme-muted);
 }
 
+/* Home: show uploaded logo asset as-is (no filters/effects on the image) */
+.home-hero-image {
+  text-align: center;
+}
+
+.home-hero-image img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
 .hero {
   display: grid;
   gap: 1.5rem;
@@ -602,6 +613,54 @@ code {
   user-select: none;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.resume-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+
+.linkedin-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.linkedin-option-hint {
+  flex: 1 1 220px;
+  margin: 0;
+}
+
+.card-inline-banner {
+  margin-bottom: 1rem;
+  padding: 0.65rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: var(--radius);
+}
+
+.restyle-output-card {
+  margin-top: 1.25rem;
+}
+
 .resume-section {
   margin-bottom: 1.5rem;
 }
@@ -610,10 +669,6 @@ code {
   margin: 0 0 0.5rem;
   font-size: 1.25rem;
   color: var(--qme-blue-dark);
-}
-
-.resume-section .empty-hint {
-  margin-bottom: 0;
 }
 
 .resume-section-rewrite {

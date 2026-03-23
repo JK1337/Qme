@@ -134,10 +134,6 @@ def complete_module(request: Request, module_id: str) -> JSONResponse:
 @app.get("/cv", response_class=HTMLResponse)
 def cv_tools(request: Request, job: str | None = None) -> HTMLResponse:
     user = accounts.user_from_request(request)
-    uid = accounts.session_user_id(request)
-    catalog = credits_service.get_catalog()
-    progress = credits_service.get_progress(request.session, uid)
-    certificates = credits_service.certificates_for_progress(progress, catalog)
     job_obj = jobs_service.get_job(job) if job else None
     jd_prefill = ""
     if job_obj:
@@ -152,7 +148,6 @@ def cv_tools(request: Request, job: str | None = None) -> HTMLResponse:
         profile_user=user,
         job_pick=job_obj,
         job_description_prefill=jd_prefill,
-        certificates=certificates,
         share_url=share_url,
         register_href=register_href,
     )
