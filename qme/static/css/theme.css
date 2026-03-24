@@ -632,6 +632,74 @@ code {
   margin: 0 0 1.5rem;
 }
 
+.resume-workspace {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 980px) {
+  .resume-workspace {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+}
+
+.resume-main-column {
+  min-width: 0;
+}
+
+.resume-toolbar {
+  position: relative;
+}
+
+@media (min-width: 980px) {
+  .resume-toolbar {
+    position: sticky;
+    top: 5rem;
+    align-self: start;
+    max-height: calc(100vh - 6rem);
+    overflow: auto;
+  }
+}
+
+.resume-toolbar-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.resume-toolbar-tab {
+  border: 1px solid var(--qme-border);
+  background: var(--qme-bg);
+  color: var(--qme-muted);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.resume-toolbar-tab:hover {
+  border-color: var(--qme-blue);
+  color: var(--qme-blue);
+}
+
+.resume-toolbar-tab.is-active {
+  background: var(--qme-blue);
+  color: #fff;
+  border-color: var(--qme-blue);
+}
+
+.resume-toolbar-pane {
+  display: none;
+}
+
+.resume-toolbar-pane.is-active {
+  display: block;
+}
+
 .linkedin-option {
   display: flex;
   flex-wrap: wrap;
@@ -643,6 +711,54 @@ code {
 .linkedin-option-hint {
   flex: 1 1 220px;
   margin: 0;
+}
+
+.linkedin-official-card {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--qme-bg);
+  border: 1px solid var(--qme-border);
+  border-radius: var(--radius);
+}
+
+.linkedin-official-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--qme-text);
+}
+
+.linkedin-official-steps {
+  margin: 0 0 0.65rem;
+  padding-left: 1.2rem;
+}
+
+.linkedin-official-steps li {
+  margin: 0.2rem 0;
+}
+
+.linkedin-official-links {
+  margin: 0 0 0.75rem;
+}
+
+.resume-file-import {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-resume-import {
+  margin-bottom: 0.5rem;
+}
+
+.resume-import-status {
+  margin: 0.5rem 0 0;
+}
+
+.resume-import-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
 }
 
 .card-inline-banner {

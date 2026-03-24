@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -12,6 +12,7 @@ from qme import __version__
 from qme.services import accounts
 from qme.services import credits as credits_service
 from qme.services import jobs as jobs_service
+from qme.services import resume_file_import as resume_import
 from qme.services.cv_rewrite import rewrite_cv_for_job
 from qme.settings import settings
 
@@ -205,6 +206,33 @@ def api_cv_rewrite_job(
             "credits_charged": credits_service.REWRITE_COST if user else 0,
         }
     )
+
+
+@app.post("/api/cv/import-resume-file")
+async def api_cv_import_resume_file(file: UploadFile = File(...)) -> JSONResponse:
+    """Accept PDF/DOCX from LinkedIn (e.g. Save to PDF) and return plain text for the resume editor."""
+    raw = await file.read(resume_import.MAX_RESUME_FILE_BYTES + 1)
+    if len(raw) > resume_import.MAX_RESUME_FILE_BYTES:
+        return JSONResponse(
+            {
+                "error": f"File too large (max {resume_import.MAX_RESUME_FILE_BYTES // (1024 * 1024)} MB).",
+                "text": "",
+            },
+            status_code=413,
+        )
+    try:
+        text = resume_import.extract_resume_text(data=raw, filename=file.filename)
+    except ValueError as exc:
+        return JSONResponse({"error": str(exc), "text": ""}, status_code=400)
+    if not text.strip():
+        return JSONResponse(
+            {
+                "error": "No text could be extracted. Scanned/image-only PDFs are not supported.",
+                "text": "",
+            },
+            status_code=422,
+        )
+    return JSONResponse({"text": text, "error": ""})
 
 
 @app.get("/account/register", response_class=HTMLResponse)

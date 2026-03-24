@@ -49,6 +49,13 @@
   <input id="display_name" name="display_name" type="text" value="{{ user.display_name }}" required>
 
   <label for="main_cv">Main CV</label>
+  <p class="hint">Load from LinkedIn: save your profile as a PDF (<a href="https://www.linkedin.com/help/linkedin/answer/a541960/save-a-profile-as-a-pdf" target="_blank" rel="noopener noreferrer">LinkedIn help</a>), then upload here.</p>
+  <div class="resume-file-import account-resume-import">
+    <input type="file" id="account-linkedin-resume-file" class="sr-only" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="LinkedIn resume PDF or Word file">
+    <button type="button" class="btn btn-outline btn-sm" id="account-linkedin-resume-import-trigger">Upload LinkedIn resume (.pdf or .docx)</button>
+  </div>
+  <p id="account-cv-import-status" class="hint resume-import-status" hidden></p>
+  <p id="account-cv-import-error" class="form-error resume-import-error" hidden></p>
   <textarea id="main_cv" name="main_cv" rows="12" placeholder="Your default CV for AI rewrites…">{{ user.main_cv }}</textarea>
 
   <label for="life_story">Life story</label>
@@ -58,4 +65,69 @@
 </form>
 
 <p class="hint"><a href="/jobs">Browse roles</a> · <a href="/cv">My Resume</a></p>
+
+<script>
+(function() {
+  var cvField = document.getElementById('main_cv');
+  var importInput = document.getElementById('account-linkedin-resume-file');
+  var importTrigger = document.getElementById('account-linkedin-resume-import-trigger');
+  var importErr = document.getElementById('account-cv-import-error');
+  var importStatus = document.getElementById('account-cv-import-status');
+
+  function apiErrorMessage(data) {
+    if (data && data.error) return data.error;
+    if (data && data.detail) {
+      if (typeof data.detail === 'string') return data.detail;
+      if (Array.isArray(data.detail)) {
+        return data.detail.map(function(d) { return d.msg || JSON.stringify(d); }).join(' ');
+      }
+    }
+    return 'Request failed';
+  }
+
+  if (!importTrigger || !importInput || !cvField) return;
+
+  importTrigger.addEventListener('click', function() {
+    importInput.click();
+  });
+
+  importInput.addEventListener('change', function() {
+    var f = importInput.files && importInput.files[0];
+    if (!f) return;
+    if (importErr) {
+      importErr.hidden = true;
+      importErr.textContent = '';
+    }
+    if (importStatus) {
+      importStatus.hidden = false;
+      importStatus.textContent = 'Reading file…';
+    }
+    var fd = new FormData();
+    fd.append('file', f);
+    fetch('/api/cv/import-resume-file', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function(r) {
+        return r.json().then(function(data) {
+          if (!r.ok) throw new Error(apiErrorMessage(data));
+          return data;
+        });
+      })
+      .then(function(data) {
+        cvField.value = data.text;
+        importInput.value = '';
+        if (importStatus) {
+          importStatus.hidden = false;
+          importStatus.textContent = 'Imported — review and save your profile.';
+        }
+      })
+      .catch(function(err) {
+        if (importErr) {
+          importErr.textContent = err.message;
+          importErr.hidden = false;
+        }
+        if (importStatus) importStatus.hidden = true;
+        importInput.value = '';
+      });
+  });
+})();
+</script>
 {% endblock %}

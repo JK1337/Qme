@@ -9,83 +9,113 @@
 
 <nav class="resume-toc card" aria-label="My Resume sections">
   <span class="resume-toc-label">Jump to:</span>
-  <a href="#input-resume-data">Input Resume data</a>
+  <a href="#resume-toolbar-data">Data edit</a>
   <span class="resume-toc-sep" aria-hidden="true">·</span>
   <a href="#rewrite-job-description">Rewrite towards a job</a>
   <span class="resume-toc-sep" aria-hidden="true">·</span>
-  <a href="#restyle-cv">Restyle CV</a>
+  <a href="#resume-toolbar-preview">Styled preview</a>
   <span class="resume-toc-sep" aria-hidden="true">·</span>
   <a href="#share-download">Share and Download</a>
 </nav>
 
-<form id="cv-form" method="post" action="/api/cv/rewrite-job" class="resume-form">
+<div class="resume-workspace">
+  <div class="resume-main-column">
+    <form id="cv-form" method="post" action="/api/cv/rewrite-job" class="resume-form">
+      <section id="rewrite-job-description" class="card resume-section resume-section-rewrite">
+        <div class="page-header resume-subhead">
+          <h2 class="resume-section-title">Rewrite my CV towards a Job description</h2>
+          <p>
+            Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
+            When signed in, Qme uses your <strong>life story</strong> from your account for extra context.
+            {% if profile_user %}
+            Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
+            {% else %}
+            <a href="{{ register_href }}">Create an account</a> to link your story; guests can try rewrites without spending credits.
+            {% endif %}
+          </p>
+        </div>
 
-  <section id="input-resume-data" class="card resume-section">
-    <h2 class="resume-section-title">Input Resume data</h2>
-    <p class="hint">
-      Paste your CV text here. When signed in, your <a href="/account">saved main CV</a> is pre-filled — edit or replace as needed.
-    </p>
-    <div class="linkedin-option">
-      <a
-        class="btn btn-outline btn-sm"
-        href="https://www.linkedin.com/help/linkedin/answer/a541860"
-        target="_blank"
-        rel="noopener noreferrer"
-      >Take CV from LinkedIn</a>
-      <p class="hint linkedin-option-hint">
-        Opens LinkedIn’s help on exporting your profile data. Copy the relevant sections and paste them into the box below.
-      </p>
-    </div>
-    <label class="sr-only" for="cv_override">Your CV text</label>
-    <textarea id="cv_override" name="cv_override" rows="12" placeholder="Paste your full CV…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
-  </section>
-
-  <section id="rewrite-job-description" class="card resume-section resume-section-rewrite">
-    <div class="page-header resume-subhead">
-      <h2 class="resume-section-title">Rewrite my CV towards a Job description</h2>
-      <p>
-        Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
-        When signed in, Qme uses your <strong>life story</strong> from your account for extra context.
-        {% if profile_user %}
-        Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
-        {% else %}
-        <a href="{{ register_href }}">Create an account</a> to link your story; guests can try rewrites without spending credits.
+        {% if job_pick %}
+        <div class="card-inline-banner">
+          <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
+          <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
+        </div>
         {% endif %}
+
+        <label for="job_description">Job description</label>
+        <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
+        <button type="submit" class="btn btn-primary">Generate aligned draft</button>
+      </section>
+    </form>
+  </div>
+
+  <aside class="card resume-toolbar" aria-label="Resume tools">
+    <div class="resume-toolbar-tabs" role="tablist" aria-label="Resume toolbar panes">
+      <button type="button" class="resume-toolbar-tab is-active" id="toolbar-tab-data" data-pane="resume-toolbar-data" role="tab" aria-selected="true" aria-controls="resume-toolbar-data">Data edit</button>
+      <button type="button" class="resume-toolbar-tab" id="toolbar-tab-preview" data-pane="resume-toolbar-preview" role="tab" aria-selected="false" aria-controls="resume-toolbar-preview">Styled preview</button>
+    </div>
+
+    <section id="resume-toolbar-data" class="resume-toolbar-pane is-active" role="tabpanel" aria-labelledby="toolbar-tab-data">
+      <h2 class="resume-section-title">Data edit</h2>
+      <p class="hint">
+        Paste your CV text here, or load it from LinkedIn’s <strong>official</strong> export (PDF / Word). When signed in, your <a href="/account">saved main CV</a> is pre-filled.
       </p>
-    </div>
+      <div class="linkedin-official-card">
+        <p class="linkedin-official-title">From LinkedIn (official)</p>
+        <ol class="linkedin-official-steps hint">
+          <li>On <strong>desktop</strong>, open your LinkedIn <strong>profile</strong>.</li>
+          <li>Click <strong>More</strong> or <strong>Resources</strong> in the intro section → <strong>Save to PDF</strong>.</li>
+          <li>Upload that file here — we extract the text into the box below so you can edit it.</li>
+        </ol>
+        <p class="hint linkedin-official-links">
+          <a href="https://www.linkedin.com/help/linkedin/answer/a541960/save-a-profile-as-a-pdf" target="_blank" rel="noopener noreferrer">LinkedIn: Save a profile as a PDF</a>
+          · <a href="https://www.linkedin.com/help/linkedin/answer/a510363" target="_blank" rel="noopener noreferrer">Resumes on LinkedIn</a>
+          · <a href="https://www.linkedin.com/help/linkedin/answer/a541860" target="_blank" rel="noopener noreferrer">Download your data</a>
+        </p>
+        <div class="resume-file-import">
+          <input type="file" id="linkedin-resume-file" class="sr-only" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="LinkedIn resume PDF or Word file">
+          <button type="button" class="btn btn-primary btn-sm" id="linkedin-resume-import-trigger">Upload LinkedIn resume (.pdf or .docx)</button>
+        </div>
+        <p id="cv-import-status" class="hint resume-import-status" hidden></p>
+        <p id="cv-import-error" class="form-error resume-import-error" hidden></p>
+      </div>
+      <label class="sr-only" for="cv_override">Your CV text</label>
+      <textarea form="cv-form" id="cv_override" name="cv_override" rows="12" placeholder="Paste your full CV…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
+    </section>
 
-    {% if job_pick %}
-    <div class="card-inline-banner">
-      <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
-      <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
-    </div>
-    {% endif %}
+    <section id="resume-toolbar-preview" class="resume-toolbar-pane" role="tabpanel" aria-labelledby="toolbar-tab-preview" hidden>
+      <h2 class="resume-section-title">Styled preview (.docx)</h2>
+      <p class="hint">Choose a style, then review your resume in a word-document-like preview pane.</p>
+      <div class="style-picker" role="radiogroup" aria-label="CV style">
+        <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="classic" checked> Classic</label>
+        <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="modern"> Modern</label>
+        <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="executive"> Executive</label>
+      </div>
 
-    <label for="job_description">Job description</label>
-    <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
-    <button type="submit" class="btn btn-primary">Generate aligned draft</button>
-  </section>
-</form>
+      <div class="output-card restyle-output-card">
+        <div class="output-toolbar">
+          <h3>Output preview</h3>
+        </div>
+        <div id="cv-output-wrap" class="cv-styled-output cv-style-classic">
+          <pre id="cv-output" class="output-pre-inner">Generate a draft above to see it here.</pre>
+        </div>
+      </div>
+      <p id="cv-notes" class="hint"></p>
+      <p id="cv-error" class="form-error" hidden></p>
+    </section>
+  </aside>
+</div>
 
-<section id="restyle-cv" class="card resume-section">
-  <h2 class="resume-section-title">Restyle CV</h2>
-  <p class="hint">Choose how the <strong>output preview</strong> below is styled. Changing style does not change the words — only the presentation.</p>
-  <div class="style-picker" role="radiogroup" aria-label="CV style">
-    <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="classic" checked> Classic</label>
-    <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="modern"> Modern</label>
-    <label class="style-option"><input form="cv-form" type="radio" name="cv_style" value="executive"> Executive</label>
-  </div>
+<section id="restyle-cv" class="sr-only" aria-hidden="true">
+  <h2>Restyle CV</h2>
+</section>
 
-  <div class="output-card restyle-output-card">
-    <div class="output-toolbar">
-      <h3>Output preview</h3>
-    </div>
-    <div id="cv-output-wrap" class="cv-styled-output cv-style-classic">
-      <pre id="cv-output" class="output-pre-inner">Generate a draft above to see it here.</pre>
-    </div>
-    <p id="cv-notes" class="hint"></p>
-    <p id="cv-error" class="form-error" hidden></p>
-  </div>
+<section id="input-resume-data" class="sr-only" aria-hidden="true">
+  <h2>Input Resume data</h2>
+</section>
+
+<section id="docx-preview" class="sr-only" aria-hidden="true">
+  <h2>Styled preview</h2>
 </section>
 
 <section id="share-download" class="card resume-section share-download-section">
@@ -120,6 +150,22 @@
   var wrap = document.getElementById('cv-output-wrap');
   var errEl = document.getElementById('cv-error');
   var notesEl = document.getElementById('cv-notes');
+  var cvOverride = document.getElementById('cv_override');
+  var importInput = document.getElementById('linkedin-resume-file');
+  var importTrigger = document.getElementById('linkedin-resume-import-trigger');
+  var importErr = document.getElementById('cv-import-error');
+  var importStatus = document.getElementById('cv-import-status');
+
+  function apiErrorMessage(data) {
+    if (data && data.error) return data.error;
+    if (data && data.detail) {
+      if (typeof data.detail === 'string') return data.detail;
+      if (Array.isArray(data.detail)) {
+        return data.detail.map(function(d) { return d.msg || JSON.stringify(d); }).join(' ');
+      }
+    }
+    return 'Request failed';
+  }
 
   function applyStyle() {
     var v = document.querySelector('input[name="cv_style"]:checked');
@@ -128,6 +174,68 @@
   }
   document.querySelectorAll('input[name="cv_style"]').forEach(function(r) {
     r.addEventListener('change', applyStyle);
+  });
+  applyStyle();
+
+  var paneTabs = document.querySelectorAll('.resume-toolbar-tab');
+  var panes = document.querySelectorAll('.resume-toolbar-pane');
+  if (importTrigger && importInput && cvOverride) {
+    importTrigger.addEventListener('click', function() {
+      importInput.click();
+    });
+    importInput.addEventListener('change', function() {
+      var f = importInput.files && importInput.files[0];
+      if (!f) return;
+      if (importErr) {
+        importErr.hidden = true;
+        importErr.textContent = '';
+      }
+      if (importStatus) {
+        importStatus.hidden = false;
+        importStatus.textContent = 'Reading file…';
+      }
+      var fd = new FormData();
+      fd.append('file', f);
+      fetch('/api/cv/import-resume-file', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function(r) {
+          return r.json().then(function(data) {
+            if (!r.ok) throw new Error(apiErrorMessage(data));
+            return data;
+          });
+        })
+        .then(function(data) {
+          cvOverride.value = data.text;
+          importInput.value = '';
+          if (importStatus) {
+            importStatus.hidden = false;
+            importStatus.textContent = 'Imported from file — review and edit the text below.';
+          }
+        })
+        .catch(function(err) {
+          if (importErr) {
+            importErr.textContent = err.message;
+            importErr.hidden = false;
+          }
+          if (importStatus) importStatus.hidden = true;
+          importInput.value = '';
+        });
+    });
+  }
+
+  paneTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var targetId = tab.getAttribute('data-pane');
+      paneTabs.forEach(function(btn) {
+        var isActive = btn === tab;
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      panes.forEach(function(pane) {
+        var isActive = pane.id === targetId;
+        pane.classList.toggle('is-active', isActive);
+        pane.hidden = !isActive;
+      });
+    });
   });
 
   form.addEventListener('submit', function(e) {
