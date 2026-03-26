@@ -1,0 +1,56 @@
+.resume {
+  display: flex;
+  flex-direction: row;
+}
+
+.left-pane {
+  flex: 40%;
+  padding: 20px;
+}
+
+.right-pane {
+  flex: 60%;
+  padding: 20px;
+}
+
+.toolbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ccc;
+}
+
+.tab {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.tab.active {
+  font-weight: bold;
+}
+
+.input {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.resume-style {
+  &.modern {
+    color: blue;
+    font-family: 'Helvetica, Arial, sans-serif';
+  }
+  &.classic {
+    font-family: 'Georgia, serif';
+    color: black;
+  }
+  &.creative {
+    color: purple;
+    font-family: 'Arial, sans-serif';
+    font-weight: bold;
+  }
+}
