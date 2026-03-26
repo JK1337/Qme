@@ -780,6 +780,27 @@ code {
   margin: 0.4rem 0 0;
 }
 
+.structured-editor {
+  margin-top: 1rem;
+}
+
+.structured-editor input,
+.structured-editor textarea {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.structured-grid.two {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 680px) {
+  .structured-grid.two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .linkedin-official-steps {
   margin: 0 0 0.65rem;
   padding-left: 1.2rem;

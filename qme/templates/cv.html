@@ -59,8 +59,32 @@
         <p id="cv-import-status" class="hint resume-import-status" hidden></p>
         <p id="cv-import-error" class="form-error resume-import-error" hidden></p>
       </div>
-      <label class="sr-only" for="cv_override">Your CV text</label>
-      <textarea id="cv_override" name="cv_override" class="resume-pane-textarea" rows="20" placeholder="Paste your full CV…">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
+
+      <div class="structured-editor">
+        <h3 class="style-section-title">Personal information</h3>
+        <div class="structured-grid two">
+          <input id="pi_full_name" type="text" placeholder="Full name">
+          <input id="pi_email" type="email" placeholder="Email">
+          <input id="pi_phone" type="text" placeholder="Phone">
+          <input id="pi_location" type="text" placeholder="Location">
+        </div>
+        <input id="pi_linkedin" type="url" placeholder="LinkedIn URL (optional)">
+
+        <h3 class="style-section-title">Professional summary</h3>
+        <textarea id="rs_summary" rows="5" placeholder="Brief summary..."></textarea>
+
+        <h3 class="style-section-title">Strengths / skills</h3>
+        <textarea id="rs_strengths" rows="5" placeholder="Core strengths, tools, and capabilities..."></textarea>
+
+        <h3 class="style-section-title">Education</h3>
+        <textarea id="rs_education" rows="6" placeholder="School, degree, field, graduation..."></textarea>
+
+        <h3 class="style-section-title">Work experience</h3>
+        <textarea id="rs_experience" rows="8" placeholder="Role, company, achievements, impact..."></textarea>
+      </div>
+
+      <label class="sr-only" for="cv_override">Composed resume payload</label>
+      <textarea id="cv_override" name="cv_override" class="sr-only">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
     </section>
 
     <section id="resume-toolbar-preview" class="card resume-section">
@@ -156,6 +180,15 @@
   var linkedinUrlInput = document.getElementById('linkedin-profile-url');
   var linkedinOpenBtn = document.getElementById('linkedin-open-profile');
   var linkedinUrlErr = document.getElementById('linkedin-url-error');
+  var fullNameEl = document.getElementById('pi_full_name');
+  var emailEl = document.getElementById('pi_email');
+  var phoneEl = document.getElementById('pi_phone');
+  var locationEl = document.getElementById('pi_location');
+  var linkedinEl = document.getElementById('pi_linkedin');
+  var summaryEl = document.getElementById('rs_summary');
+  var strengthsEl = document.getElementById('rs_strengths');
+  var educationEl = document.getElementById('rs_education');
+  var experienceEl = document.getElementById('rs_experience');
 
   function apiErrorMessage(data) {
     if (data && data.error) return data.error;
@@ -172,6 +205,42 @@
     var v = document.querySelector('input[name="cv_style"]:checked');
     var val = v ? v.value : 'classic';
     out.className = 'resume-pane-textarea cv-style-' + val;
+  }
+
+  function section(title, body) {
+    var t = (body || '').trim();
+    return t ? (title + '\n' + t) : '';
+  }
+
+  function composeStructuredResume() {
+    var contact = [
+      (fullNameEl && fullNameEl.value || '').trim(),
+      (emailEl && emailEl.value || '').trim(),
+      (phoneEl && phoneEl.value || '').trim(),
+      (locationEl && locationEl.value || '').trim(),
+      (linkedinEl && linkedinEl.value || '').trim()
+    ].filter(Boolean).join(' | ');
+
+    var chunks = [];
+    if (contact) chunks.push('Profile\n' + contact);
+    var summary = summaryEl ? summaryEl.value : '';
+    if (summary && summary.trim()) chunks.push(section('Summary', summary));
+    var strengths = strengthsEl ? strengthsEl.value : '';
+    if (strengths && strengths.trim()) chunks.push(section('Strengths', strengths));
+    var education = educationEl ? educationEl.value : '';
+    if (education && education.trim()) chunks.push(section('Education', education));
+    var experience = experienceEl ? experienceEl.value : '';
+    if (experience && experience.trim()) chunks.push(section('Job Experience', experience));
+    return chunks.join('\n\n').trim();
+  }
+
+  function syncComposedResume() {
+    if (!cvOverride) return;
+    var composed = composeStructuredResume();
+    cvOverride.value = composed;
+    if (!out.value || out.value === 'Generate a draft above to see it here.') {
+      out.value = composed || 'Generate a draft above to see it here.';
+    }
   }
 
   function normalizeLinkedInProfileUrl(raw) {
@@ -210,6 +279,12 @@
     });
   }
 
+  [fullNameEl, emailEl, phoneEl, locationEl, linkedinEl, summaryEl, strengthsEl, educationEl, experienceEl]
+    .filter(Boolean)
+    .forEach(function(el) {
+      el.addEventListener('input', syncComposedResume);
+    });
+
   if (importTrigger && importInput && cvOverride) {
     importTrigger.addEventListener('click', function() {
       importInput.click();
@@ -236,6 +311,11 @@
         })
         .then(function(data) {
           cvOverride.value = data.text;
+          if (summaryEl && data.fields && typeof data.fields.profile === 'string') summaryEl.value = data.fields.profile;
+          if (strengthsEl && data.fields && typeof data.fields.strengths === 'string') strengthsEl.value = data.fields.strengths;
+          if (educationEl && data.fields && typeof data.fields.education === 'string') educationEl.value = data.fields.education;
+          if (experienceEl && data.fields && typeof data.fields.job_experience === 'string') experienceEl.value = data.fields.job_experience;
+          syncComposedResume();
           importInput.value = '';
           if (importStatus) {
             importStatus.hidden = false;
@@ -255,6 +335,7 @@
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    syncComposedResume();
     errEl.hidden = true;
     errEl.textContent = '';
     notesEl.textContent = '';
@@ -300,6 +381,7 @@
       document.execCommand('copy');
     });
   }
+  syncComposedResume();
 })();
 </script>
 {% endblock %}
