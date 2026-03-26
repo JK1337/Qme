@@ -700,6 +700,32 @@ code {
   display: block;
 }
 
+.resume-panes-two {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 980px) {
+  .resume-panes-two {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+
+  .resume-panes-two > .resume-section {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 10rem);
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  .resume-panes-two > .resume-section .resume-pane-textarea {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
 .linkedin-option {
   display: flex;
   flex-wrap: wrap;
@@ -775,6 +801,16 @@ code {
 
 .restyle-output-card {
   margin-top: 1.25rem;
+}
+
+.resume-pane-textarea {
+  width: 100%;
+  min-height: 52vh;
+  resize: vertical;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
 .resume-section {
@@ -894,15 +930,38 @@ code {
   color: var(--qme-text);
 }
 
+.resume-pane-textarea.cv-style-classic {
+  background: #fff;
+  color: var(--qme-text);
+  border: 1px solid var(--qme-border);
+  border-radius: var(--radius);
+}
+
 .cv-style-modern .output-pre-inner {
   background: linear-gradient(180deg, #fafafa 0%, #fff 40%);
   color: #1a1a2e;
   border-left: 4px solid var(--qme-blue);
 }
 
+.resume-pane-textarea.cv-style-modern {
+  background: linear-gradient(180deg, #fafafa 0%, #fff 40%);
+  color: #1a1a2e;
+  border: 1px solid var(--qme-border);
+  border-left: 4px solid var(--qme-blue);
+  border-radius: var(--radius);
+}
+
 .cv-style-executive .output-pre-inner {
   background: #1e1e1e;
   color: #f0f0f0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.resume-pane-textarea.cv-style-executive {
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border: 1px solid #2d2d2d;
+  border-radius: var(--radius);
   font-family: Georgia, "Times New Roman", serif;
 }
 
