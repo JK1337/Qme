@@ -81,10 +81,14 @@
 
         <h3 class="style-section-title">Work experience</h3>
         <textarea id="rs_experience" rows="8" placeholder="Role, company, achievements, impact..."></textarea>
+        <div class="resume-data-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="apply-data-btn">Apply data</button>
+          <span id="apply-data-status" class="hint" hidden>Data applied.</span>
+        </div>
       </div>
 
       <label class="sr-only" for="cv_override">Composed resume payload</label>
-      <textarea id="cv_override" name="cv_override" class="sr-only">{% if profile_user %}{{ profile_user.main_cv }}{% endif %}</textarea>
+      <textarea id="cv_override" name="cv_override" class="sr-only">{{ initial_cv }}</textarea>
     </section>
 
     <section id="resume-toolbar-preview" class="card resume-section">
@@ -180,6 +184,8 @@
   var linkedinUrlInput = document.getElementById('linkedin-profile-url');
   var linkedinOpenBtn = document.getElementById('linkedin-open-profile');
   var linkedinUrlErr = document.getElementById('linkedin-url-error');
+  var applyDataBtn = document.getElementById('apply-data-btn');
+  var applyDataStatus = document.getElementById('apply-data-status');
   var fullNameEl = document.getElementById('pi_full_name');
   var emailEl = document.getElementById('pi_email');
   var phoneEl = document.getElementById('pi_phone');
@@ -237,10 +243,20 @@
   function syncComposedResume() {
     if (!cvOverride) return;
     var composed = composeStructuredResume();
+    if (!composed && cvOverride.value && cvOverride.value.trim()) return;
     cvOverride.value = composed;
     if (!out.value || out.value === 'Generate a draft above to see it here.') {
       out.value = composed || 'Generate a draft above to see it here.';
     }
+  }
+
+  function markDataApplied(message) {
+    if (!applyDataStatus) return;
+    applyDataStatus.hidden = false;
+    applyDataStatus.textContent = message || 'Data applied.';
+    window.setTimeout(function() {
+      applyDataStatus.hidden = true;
+    }, 1800);
   }
 
   function normalizeLinkedInProfileUrl(raw) {
@@ -284,6 +300,37 @@
     .forEach(function(el) {
       el.addEventListener('input', syncComposedResume);
     });
+
+  if (applyDataBtn) {
+    applyDataBtn.addEventListener('click', function() {
+      syncComposedResume();
+      if (!cvOverride || !cvOverride.value || !cvOverride.value.trim()) {
+        if (applyDataStatus) {
+          applyDataStatus.hidden = false;
+          applyDataStatus.textContent = 'Add resume content before applying data.';
+        }
+        return;
+      }
+      var fd = new FormData();
+      fd.append('cv_text', cvOverride.value);
+      fetch('/api/cv/apply-data', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function(r) {
+          return r.json().then(function(data) {
+            if (!r.ok) throw new Error(apiErrorMessage(data));
+            return data;
+          });
+        })
+        .then(function(data) {
+          markDataApplied(data.message || 'Data applied.');
+        })
+        .catch(function(err) {
+          if (applyDataStatus) {
+            applyDataStatus.hidden = false;
+            applyDataStatus.textContent = err.message;
+          }
+        });
+    });
+  }
 
   if (importTrigger && importInput && cvOverride) {
     importTrigger.addEventListener('click', function() {

@@ -790,6 +790,13 @@ code {
   margin-bottom: 0.75rem;
 }
 
+.resume-data-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
 .structured-grid.two {
   display: grid;
   gap: 0.5rem;

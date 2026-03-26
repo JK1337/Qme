@@ -137,6 +137,7 @@ def complete_module(request: Request, module_id: str) -> JSONResponse:
 @app.get("/cv", response_class=HTMLResponse)
 def cv_tools(request: Request, job: str | None = None) -> HTMLResponse:
     user = accounts.user_from_request(request)
+    initial_cv = user.main_cv if user else str(request.session.get("guest_main_cv", ""))
     job_obj = jobs_service.get_job(job) if job else None
     jd_prefill = ""
     if job_obj:
@@ -149,6 +150,7 @@ def cv_tools(request: Request, job: str | None = None) -> HTMLResponse:
         "cv.html",
         title="My Resume",
         profile_user=user,
+        initial_cv=initial_cv,
         job_pick=job_obj,
         job_description_prefill=jd_prefill,
         share_url=share_url,
@@ -164,7 +166,8 @@ def api_cv_rewrite_job(
 ) -> JSONResponse:
     user = accounts.user_from_request(request)
     override = cv_override.strip()
-    document = override if override else (user.main_cv if user else "")
+    guest_cv = str(request.session.get("guest_main_cv", "")).strip()
+    document = override if override else (user.main_cv if user else guest_cv)
     life_story = user.life_story if user else ""
 
     if not document:
@@ -208,6 +211,19 @@ def api_cv_rewrite_job(
             "credits_charged": credits_service.REWRITE_COST if user else 0,
         }
     )
+
+
+@app.post("/api/cv/apply-data")
+def api_cv_apply_data(request: Request, cv_text: str = Form("")) -> JSONResponse:
+    text = cv_text.strip()
+    if not text:
+        return JSONResponse({"ok": False, "error": "Add resume content before applying data."}, status_code=400)
+    user = accounts.user_from_request(request)
+    if user:
+        accounts.update_profile(user.id, main_cv=text)
+        return JSONResponse({"ok": True, "scope": "account", "message": "Data applied to your main CV."})
+    request.session["guest_main_cv"] = text
+    return JSONResponse({"ok": True, "scope": "session", "message": "Data applied for this session."})
 
 
 @app.post("/api/cv/import-resume-file")
