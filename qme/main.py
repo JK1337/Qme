@@ -3,7 +3,7 @@ from typing import Any
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -12,8 +12,10 @@ from qme import __version__
 from qme.services import accounts
 from qme.services import credits as credits_service
 from qme.services import jobs as jobs_service
+from qme.services import cv_docx
 from qme.services import resume_file_import as resume_import
 from qme.services.cv_rewrite import rewrite_cv_for_job
+from qme.services.resume_sections import compose_resume_text, parse_resume_sections
 from qme.settings import settings
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -232,7 +234,58 @@ async def api_cv_import_resume_file(file: UploadFile = File(...)) -> JSONRespons
             },
             status_code=422,
         )
-    return JSONResponse({"text": text, "error": ""})
+    parsed = parse_resume_sections(text)
+    return JSONResponse(
+        {
+            "text": text,
+            "error": "",
+            "fields": {
+                "profile": parsed.profile,
+                "strengths": parsed.strengths,
+                "education": parsed.education,
+                "job_experience": parsed.job_experience,
+            },
+        }
+    )
+
+
+@app.post("/api/cv/export-docx")
+def api_cv_export_docx(
+    text: str = Form(""),
+    cv_style: str = Form("classic"),
+    profile: str = Form(""),
+    strengths: str = Form(""),
+    education: str = Form(""),
+    job_experience: str = Form(""),
+) -> Response:
+    source_text = text.strip()
+    if profile.strip() or strengths.strip() or education.strip() or job_experience.strip():
+        source_text = compose_resume_text(
+            parse_resume_sections(
+                compose_resume_text(
+                    parse_resume_sections(
+                        "\n\n".join(
+                            [
+                                f"Profile\n{profile.strip()}",
+                                f"Strengths\n{strengths.strip()}",
+                                f"Education\n{education.strip()}",
+                                f"Job Experience\n{job_experience.strip()}",
+                            ]
+                        )
+                    )
+                )
+            )
+        )
+    if not source_text:
+        return JSONResponse({"error": "Add resume content before exporting DOCX."}, status_code=400)
+    style_name = cv_style if cv_style in {"classic", "modern", "executive"} else "classic"
+    payload = cv_docx.build_resume_docx(source_text, style_name=style_name)
+    headers = {"Content-Disposition": 'attachment; filename="qme-resume.docx"'}
+    return Response(
+        content=payload,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers=headers,
+    )
 
 
 @app.get("/account/register", response_class=HTMLResponse)
