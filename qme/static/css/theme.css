@@ -754,6 +754,32 @@ code {
   color: var(--qme-text);
 }
 
+.linkedin-url-assist {
+  margin: 0 0 0.75rem;
+}
+
+.linkedin-url-assist label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--qme-muted);
+  margin-bottom: 0.35rem;
+}
+
+.linkedin-url-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.linkedin-url-row input[type="url"] {
+  flex: 1 1 260px;
+}
+
+.linkedin-url-help {
+  margin: 0.4rem 0 0;
+}
+
 .linkedin-official-steps {
   margin: 0 0 0.65rem;
   padding-left: 1.2rem;

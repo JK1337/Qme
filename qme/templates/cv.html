@@ -19,32 +19,6 @@
 </nav>
 
 <form id="cv-form" method="post" action="/api/cv/rewrite-job" class="resume-form">
-  <section id="rewrite-job-description" class="card resume-section resume-section-rewrite">
-    <div class="page-header resume-subhead">
-      <h2 class="resume-section-title">Rewrite my CV towards a Job description</h2>
-      <p>
-        Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
-        When signed in, Qme uses your <strong>life story</strong> from your account for extra context.
-        {% if profile_user %}
-        Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
-        {% else %}
-        <a href="{{ register_href }}">Create an account</a> to link your story; guests can try rewrites without spending credits.
-        {% endif %}
-      </p>
-    </div>
-
-    {% if job_pick %}
-    <div class="card-inline-banner">
-      <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
-      <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
-    </div>
-    {% endif %}
-
-    <label for="job_description">Job description</label>
-    <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
-    <button type="submit" class="btn btn-primary">Generate aligned draft</button>
-  </section>
-
   <section class="resume-panes-two">
     <section id="resume-toolbar-data" class="card resume-section">
       <h2 class="resume-section-title">Data edit</h2>
@@ -53,6 +27,21 @@
       </p>
       <div class="linkedin-official-card">
         <p class="linkedin-official-title">From LinkedIn (official)</p>
+        <div class="linkedin-url-assist">
+          <label for="linkedin-profile-url">LinkedIn profile URL</label>
+          <div class="linkedin-url-row">
+            <input
+              id="linkedin-profile-url"
+              type="url"
+              placeholder="https://www.linkedin.com/in/your-profile"
+              autocomplete="url"
+              inputmode="url"
+            >
+            <button type="button" class="btn btn-outline btn-sm" id="linkedin-open-profile">Open profile</button>
+          </div>
+          <p class="hint linkedin-url-help">We use this link as a helper only. Open your profile, export PDF/Word on LinkedIn, then upload below.</p>
+          <p id="linkedin-url-error" class="form-error resume-import-error" hidden></p>
+        </div>
         <ol class="linkedin-official-steps hint">
           <li>On <strong>desktop</strong>, open your LinkedIn <strong>profile</strong>.</li>
           <li>Click <strong>More</strong> or <strong>Resources</strong> in the intro section → <strong>Save to PDF</strong>.</li>
@@ -87,6 +76,32 @@
       <p id="cv-notes" class="hint"></p>
       <p id="cv-error" class="form-error" hidden></p>
     </section>
+  </section>
+
+  <section id="rewrite-job-description" class="card resume-section resume-section-rewrite">
+    <div class="page-header resume-subhead">
+      <h2 class="resume-section-title">Rewrite my CV towards a Job description</h2>
+      <p>
+        Paste a <strong>job description</strong> (or open a role from <a href="/jobs">Browse roles</a> — we pre-fill for you).
+        When signed in, Qme uses your <strong>life story</strong> from your account for extra context.
+        {% if profile_user %}
+        Each rewrite uses <strong>{{ rewrite_cost }} credits</strong> (you have <strong id="nav-balance-dup">{{ credit_balance }}</strong> available).
+        {% else %}
+        <a href="{{ register_href }}">Create an account</a> to link your story; guests can try rewrites without spending credits.
+        {% endif %}
+      </p>
+    </div>
+
+    {% if job_pick %}
+    <div class="card-inline-banner">
+      <strong>Targeting:</strong> {{ job_pick.title }} at {{ job_pick.company }}
+      <a class="btn btn-outline btn-sm" href="/cv">Clear role link</a>
+    </div>
+    {% endif %}
+
+    <label for="job_description">Job description</label>
+    <textarea name="job_description" id="job_description" rows="8" placeholder="Paste the role description…" required>{% if job_description_prefill %}{{ job_description_prefill }}{% endif %}</textarea>
+    <button type="submit" class="btn btn-primary">Generate aligned draft</button>
   </section>
 </form>
 
@@ -138,6 +153,9 @@
   var importTrigger = document.getElementById('linkedin-resume-import-trigger');
   var importErr = document.getElementById('cv-import-error');
   var importStatus = document.getElementById('cv-import-status');
+  var linkedinUrlInput = document.getElementById('linkedin-profile-url');
+  var linkedinOpenBtn = document.getElementById('linkedin-open-profile');
+  var linkedinUrlErr = document.getElementById('linkedin-url-error');
 
   function apiErrorMessage(data) {
     if (data && data.error) return data.error;
@@ -155,10 +173,42 @@
     var val = v ? v.value : 'classic';
     out.className = 'resume-pane-textarea cv-style-' + val;
   }
+
+  function normalizeLinkedInProfileUrl(raw) {
+    var value = (raw || '').trim();
+    if (!value) return null;
+    if (!/^https?:\/\//i.test(value)) value = 'https://' + value;
+    try {
+      var url = new URL(value);
+      var host = url.hostname.toLowerCase();
+      if (host === 'linkedin.com' || host === 'www.linkedin.com') {
+        if (/^\/in\/[^/]+\/?$/i.test(url.pathname)) return url.toString();
+      }
+    } catch (e) {}
+    return null;
+  }
   document.querySelectorAll('input[name="cv_style"]').forEach(function(r) {
     r.addEventListener('change', applyStyle);
   });
   applyStyle();
+
+  if (linkedinOpenBtn && linkedinUrlInput) {
+    linkedinOpenBtn.addEventListener('click', function() {
+      var normalized = normalizeLinkedInProfileUrl(linkedinUrlInput.value);
+      if (!normalized) {
+        if (linkedinUrlErr) {
+          linkedinUrlErr.hidden = false;
+          linkedinUrlErr.textContent = 'Enter a valid public LinkedIn profile URL (example: https://www.linkedin.com/in/your-name).';
+        }
+        return;
+      }
+      if (linkedinUrlErr) {
+        linkedinUrlErr.hidden = true;
+        linkedinUrlErr.textContent = '';
+      }
+      window.open(normalized, '_blank', 'noopener,noreferrer');
+    });
+  }
 
   if (importTrigger && importInput && cvOverride) {
     importTrigger.addEventListener('click', function() {
